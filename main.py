@@ -40,7 +40,7 @@ blob = bucket.blob(firebase_storage_path)
 blob.download_to_filename(local_file_path)
 print("Face encodings downloaded from Firebase Storage")
 
-# Load Facial Encoding - Manual
+# Load Facial Encoding
 file = open("employees.p", "rb")
 EmployeeList = pickle.load(file)
 file.close()
@@ -52,7 +52,9 @@ mode = 0
 detect_flag = False
 match_timer = 0
 marked_flag = False
+match_not_found = False
 attendance_log = {}
+threshold = 0.5
 
 # Show the capture 
 while True:
@@ -81,40 +83,50 @@ while True:
         # Detect Face in Frame and get encodings
         EncodeFrame = face_recognition.face_encodings(resizedImg, FaceFrame)
         for encoding, face in zip(EncodeFrame, FaceFrame):
-            matches = face_recognition.compare_faces(KnownImgsEncoding, encoding)
-            distance = face_recognition.face_distance(KnownImgsEncoding, encoding)
-            matchIndex = np.argmin(distance)
-            emp_id = Ids[matchIndex]
-            detect_flag = True
-            match_timer = 180 # around 5 seconds
-            if emp_id not in attendance_log or attendance_log[emp_id] != dt.date.today():
-                attendance_log[emp_id] = dt.date.today()
-                print(attendance_log[emp_id])
-                # Download info
-                ref = db.reference(f"Employees/{emp_id}")
-                emp_info = ref.get()
-                print(emp_info)
-                # Update data
-                ref.child("Attendance_Last_TS").set(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-                ref.child("Attendance_Count").set(emp_info["Attendance_Count"]+1)
+            matches = face_recognition.compare_faces(KnownImgsEncoding, encoding, tolerance=threshold)
+            match_timer = 180 #Around 5 secs
+            if True in matches:
+                matchIndex = matches.index(True)
+                emp_id = Ids[matchIndex]
+                detect_flag = True
+                if emp_id not in attendance_log or attendance_log[emp_id] != dt.date.today():
+                    attendance_log[emp_id] = dt.date.today()
+                    print(attendance_log[emp_id])
+                    # Download info
+                    ref = db.reference(f"Employees/{emp_id}")
+                    emp_info = ref.get() 
+                    # Update data
+                    ref.child("Attendance_Last_TS").set(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                    ref.child("Attendance_Count").set(emp_info["Attendance_Count"]+1)
+                    emp_info = ref.get()
+                    print(emp_info)
+                else:
+                    marked_flag = True
             else:
-                marked_flag = True
+                detect_flag = True
+                match_not_found = True               
 
     # Matched - change mode
+    elif not match_not_found:
+        mode = 1
+        cv2.putText(imgBackground, str(emp_info["Attendance_Count"]),(861,125),
+                        cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
+        match_timer -=1
+        if match_timer <= 90:
+                if marked_flag == True:
+                    mode = 3
+                else:
+                    mode = 2
+        if match_timer <=0:
+                mode = 0
+                detect_flag = False
     else:
-            mode = 1
-            cv2.putText(imgBackground, str(emp_info["Attendance_Count"]),(861,125),
-                            cv2.FONT_HERSHEY_COMPLEX,1,(255,255,255),1)
-            match_timer -=1
-    if match_timer <= 90:
-            if marked_flag == True:
-                  mode = 3
-            else:
-                  mode = 2
-    if match_timer <=0:
-            mode = 0
-            detect_flag = False
-    
+        mode = 4
+        match_timer -=1  
+        if match_timer <= 90:
+                mode = 0
+                detect_flag = False
+        
     cv2.imshow("Background", imgBackground)
     
     if dt.datetime.now().hour == 23 and dt.datetime.now().minute == 59 and dt.datetime.now().second == 0:
