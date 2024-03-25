@@ -12,17 +12,17 @@ print("Success")
 # Push data to realtime db
 ref = db.reference("Employees")
 data = {
-    "erwin": {
+    "XXX2": {
     "Name": "Erwinsyah",
     "Role": "Data Science",
-    "Attendance_Count": 2,
-    "Attendance_Last_TS": dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')},
-    "ariel": {
+    "Attendance_Count": 0,
+    "Attendance_Last_TS": ""},
+    "XXX1": {
     "Name": "Nuzril",
     "Role": "Influencer",
-    "Attendance_Count": 0,
+    "Attendance_Count": 2,
     "Attendance_Last_TS": dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')},
-    "heisen": {
+    "XXX3": {
     "Name": "Walter White",
     "Role": "Chemist",
     "Attendance_Count": 10,
