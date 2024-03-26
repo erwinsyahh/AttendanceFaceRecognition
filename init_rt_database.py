@@ -12,14 +12,14 @@ firebase_admin.initialize_app(cred,{
 ref = db.reference("Employees")
 data = {
     "XXX1": {
-    "Name": "Nuzril",
-    "Role": "Influencer",
-    "Attendance_Count": 2,
+    "Name": "Wick",
+    "Role": "Cleaner",
+    "Attendance_Count": 3,
     "Attendance_Last_TS": dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')},
     "XXX3": {
     "Name": "Walter White",
     "Role": "Chemist",
-    "Attendance_Count": 10,
+    "Attendance_Count": 5,
     "Attendance_Last_TS": dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')},
 }
 
