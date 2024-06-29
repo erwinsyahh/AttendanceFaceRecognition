@@ -45,7 +45,3 @@ Encodings and ID data are stored in `employees.p`, which is uploaded, updated, a
 - The image backgrounds and modes should be improved.
 - Code can be cleaned further, especially regarding the application and data flow.
 
-## Reference
-
-This project is inspired by the work of Murtazza Hasan, whose tutorial on facial recognition served as a basis for the implementation. You can find the tutorial [here](https://www.youtube.com/watch?v=iBomaK2ARyI).
-
